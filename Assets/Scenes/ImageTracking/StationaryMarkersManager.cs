@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.SpatialTracking;
+using UnityEngine.Events;
 
 /// This component listens for images detected by the <c>XRImageTrackingSubsystem</c>
 /// and overlays some information as well as the source Texture2D on top of the
@@ -13,6 +14,46 @@ using UnityEngine.SpatialTracking;
 [RequireComponent(typeof(ARTrackedImageManager))]
 public class StationaryMarkersManager : MonoBehaviour
 {
+    public UnityEvent onHasMarkers;
+    public UnityEvent onZeroMarkers;
+
+    int _markersCount = -1;
+    public int markersCount
+    {
+        get { return _markersCount; }
+        set
+        {
+            if (_markersCount != value)
+            {
+                if (_markersCount != 0 && value == 0)
+                {
+                    SetVirtualSceneActive(false);
+                    onZeroMarkers.Invoke();
+                }
+
+                if (value > 0)
+                {
+                    SetVirtualSceneActive(true);
+                    onHasMarkers.Invoke();
+                }
+
+                _markersCount = value;
+                Debug.Log("markersCount: " + _markersCount);
+            }
+        }
+    }
+
+    GameObject[] virtualScenes;
+
+    public void SetVirtualSceneActive(bool b)
+    {
+        foreach (var virtualScene in virtualScenes)
+        {
+            virtualScene.SetActive(b);
+        }
+    }
+
+
     ARTrackedImageManager m_TrackedImageManager;
 
     public Dictionary<Guid, StationaryMarker> virtualMarkersDict
@@ -26,9 +67,17 @@ public class StationaryMarkersManager : MonoBehaviour
 
     void Awake()
     {
-        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        virtualScenes = GameObject.FindGameObjectsWithTag("VirtualScene");
+
+        if (!Application.isEditor)
+        {
+            SetVirtualSceneActive(false);
+            onZeroMarkers.Invoke();
+        }
 
         m_TrackedImageManager = GetComponent<ARTrackedImageManager>();
+
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         var virtualMarkers = GameObject.FindObjectsOfType<StationaryMarker>();
         foreach (var virtualMarker in virtualMarkers)
@@ -86,6 +135,8 @@ public class StationaryMarkersManager : MonoBehaviour
 
     void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs eventArgs)
     {
+        markersCount = Mathf.Max(0, markersCount) + eventArgs.added.Count - eventArgs.removed.Count;
+
         foreach (var trackedImage in eventArgs.added)
         {
             // Give the initial image a reasonable default scale
@@ -108,7 +159,8 @@ public class StationaryMarkersManager : MonoBehaviour
 
     private void Update()
     {
-        SyncCameraWithTracker();
+        if (lastTrackedImage != null && lastTrackedImage.trackingState != TrackingState.None)
+            MatchImageWithMarker(lastTrackedImage);
     }
 
     void MatchImageWithMarker(ARTrackedImage trackedImage)
@@ -124,7 +176,8 @@ public class StationaryMarkersManager : MonoBehaviour
 
                 if (trackedImage.transform.lossyScale != virtualMarker.transform.lossyScale)
                 {
-                    Debug.LogWarning("trackedImage scale "+ trackedImage.transform.lossyScale+" != "+ virtualMarker.transform.lossyScale+" of virtual marker! Positioning might become incorrect!");
+                    trackedImage.transform.localScale = virtualMarker.transform.lossyScale;
+                    Debug.LogWarning("trackedImage scale "+ trackedImage.transform.lossyScale.ToString("F2")+" != "+ virtualMarker.transform.lossyScale.ToString("F2") + " of virtual marker! Positioning might become incorrect!");
                 }
 
                 //lastTrackedImage.transform.localScale = Vector3.one;
@@ -144,11 +197,11 @@ public class StationaryMarkersManager : MonoBehaviour
     {
         if (lastTrackedMarker != null && lastTrackedImage != null)
         {
-            //var centerPoseRotationEuler = lastTrackedImage.transform.eulerAngles;
-            //var virtualMarkerRotation = lastTrackedMarker.transform.rotation;
-            //var virtualMarkerRotationEuler = lastTrackedMarker.transform.rotation.eulerAngles;
+            var centerPoseRotationEuler = lastTrackedImage.transform.eulerAngles;
+            var virtualMarkerRotation = lastTrackedMarker.transform.rotation;
+            var virtualMarkerRotationEuler = lastTrackedMarker.transform.rotation.eulerAngles;
 
-            /*
+            
             if (Mathf.Abs(virtualMarkerRotationEuler.x) > 1f || Mathf.Abs(virtualMarkerRotationEuler.z) > 1f)
             {
                 Quaternion rotatedTargetOrigin = Quaternion.LookRotation(Vector3.Cross(Vector3.up, Vector3.ProjectOnPlane(lastTrackedMarker.transform.right, Vector3.up)), Vector3.up);
@@ -161,37 +214,26 @@ public class StationaryMarkersManager : MonoBehaviour
             else
             {
                 lastTrackedImage.transform.rotation = Quaternion.Euler(virtualMarkerRotationEuler.x, centerPoseRotationEuler.y, virtualMarkerRotationEuler.z);
-            }*/
+            }
 
             transform.SetPositionAndRotation(
                                 lastTrackedMarker.transform.TransformPoint(lastTrackedImage.transform.InverseTransformPoint(transform.position)),
                                 lastTrackedMarker.transform.rotation * (Quaternion.Inverse(lastTrackedImage.transform.rotation) * transform.rotation )
                                 );
 
-            Debug.Log("sessionOrigin " + transform.position);
-
-
+            //Debug.Log("sessionOrigin " + transform.position);
 
             ARSessionOrigin sessionOrigin = GetComponent<ARSessionOrigin>();
             debugTrackableParent.SetParent(sessionOrigin.trackablesParent);
             debugTrackableParent.localPosition = Vector3.zero;
             debugTrackableParent.localRotation = Quaternion.identity;
-            sessionOrigin.camera = null;
-            sessionOrigin.trackablesParent.position = transform.position;
-            sessionOrigin.trackablesParent.rotation = transform.rotation;
+            //sessionOrigin.camera = null;
+            //sessionOrigin.trackablesParent.position = transform.position;
+            //sessionOrigin.trackablesParent.rotation = transform.rotation;
 
             //sessionOrigin.trackablesParent.SetPositionAndRotation(transform.position, transform.rotation);
             //sessionOrigin.trackablesParent.localPosition = Vector3.zero;
             //sessionOrigin.trackablesParent.localRotation = Quaternion.identity;
         }
-    }
-
-    void SyncCameraWithTracker()
-    {
-        //cameraTransform.localPosition = tracker.transform.localPosition;
-        //cameraTransform.localRotation = tracker.transform.localRotation;
-
-        //cameraTransform.position = tracker.transform.position;
-        //cameraTransform.rotation = tracker.transform.rotation;
     }
 }
