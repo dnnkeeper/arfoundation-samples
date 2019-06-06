@@ -45,3 +45,13 @@ MonoBehaviour:
     m_SpecifySize: 1
     m_Name: QRCode
     m_Texture: {fileID: 2800000, guid: a6fd8503774c0402aa403884f5b77f39, type: 3}
+  - m_SerializedGuid:
+      m_GuidLow: 5481506930291711783
+      m_GuidHigh: 14634876849198565007
+    m_SerializedTextureGuid:
+      m_GuidLow: 3099818867581691519
+      m_GuidHigh: 3747585543303877544
+    m_Size: {x: 0.18, y: 0.18}
+    m_SpecifySize: 1
+    m_Name: SciFiMarker16
+    m_Texture: {fileID: 2800000, guid: 2642a67fc4d62b04a853043232190234, type: 3}
