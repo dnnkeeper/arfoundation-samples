@@ -1,0 +1,1 @@
+﻿Shader "Lines/Colored Blended" { SubShader { Pass { Blend One One BindChannels { Bind "Color",color } ZTest Off ZWrite On Cull Front Fog { Mode Off } } } }

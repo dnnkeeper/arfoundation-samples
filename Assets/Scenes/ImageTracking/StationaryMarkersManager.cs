@@ -59,12 +59,6 @@ public class StationaryMarkersManager : MonoBehaviour
     public Dictionary<Guid, StationaryMarker> virtualMarkersDict
             = new Dictionary<Guid, StationaryMarker>();
 
-    //public Transform offsetOrigin;
-
-    public Transform cameraTransform;
-
-    public TrackedPoseDriver tracker;
-
     void Awake()
     {
         virtualScenes = GameObject.FindGameObjectsWithTag("VirtualScene");
@@ -106,29 +100,7 @@ public class StationaryMarkersManager : MonoBehaviour
     {
         m_TrackedImageManager.trackedImagesChanged -= OnTrackedImagesChanged;
     }
-
-    void UpdateInfo(ARTrackedImage trackedImage)
-    {
-        //var planeParentGo = trackedImage.transform.GetChild(0).gameObject;
-        //var planeGo = planeParentGo.transform.GetChild(0).gameObject;
-
-        // Disable the visual plane if it is not being tracked
-        if (trackedImage.trackingState != TrackingState.None)
-        {
-            Debug.Log(trackedImage.referenceImage.name + ".trackingState == " + trackedImage.trackingState);
-
-            //planeGo.SetActive(true);
-
-            // The image extents is only valid when the image is being tracked
-            //trackedImage.transform.localScale = new Vector3(trackedImage.size.x, 1f, trackedImage.size.y);
-        }
-        else
-        {
-            Debug.Log(trackedImage.referenceImage.name + ".trackingState == TrackingState.None");
-            //planeGo.SetActive(false);
-        }
-    }
-
+    
     StationaryMarker lastTrackedMarker;
 
     ARTrackedImage lastTrackedImage;
@@ -142,8 +114,6 @@ public class StationaryMarkersManager : MonoBehaviour
             // Give the initial image a reasonable default scale
             trackedImage.transform.localScale = new Vector3(0.01f, 1f, 0.01f);
             
-            UpdateInfo(trackedImage);
-
             Debug.Log("virtualMarker found! " + trackedImage.referenceImage.name + " guid: " + trackedImage.referenceImage.guid);
 
             MatchImageWithMarker(trackedImage);
@@ -151,8 +121,6 @@ public class StationaryMarkersManager : MonoBehaviour
 
         foreach (var trackedImage in eventArgs.updated)
         {
-            UpdateInfo(trackedImage);
-
             MatchImageWithMarker(trackedImage);
         }
     }
@@ -176,11 +144,10 @@ public class StationaryMarkersManager : MonoBehaviour
 
                 if (trackedImage.transform.lossyScale != virtualMarker.transform.lossyScale)
                 {
-                    trackedImage.transform.localScale = virtualMarker.transform.lossyScale;
                     Debug.LogWarning("trackedImage scale "+ trackedImage.transform.lossyScale.ToString("F2")+" != "+ virtualMarker.transform.lossyScale.ToString("F2") + " of virtual marker! Positioning might become incorrect!");
+                    trackedImage.transform.localScale = virtualMarker.transform.lossyScale;
                 }
 
-                //lastTrackedImage.transform.localScale = Vector3.one;
                 virtualMarker.gameObject.SetActive(true);
                 SyncOffset();
             }
@@ -220,20 +187,6 @@ public class StationaryMarkersManager : MonoBehaviour
                                 lastTrackedMarker.transform.TransformPoint(lastTrackedImage.transform.InverseTransformPoint(transform.position)),
                                 lastTrackedMarker.transform.rotation * (Quaternion.Inverse(lastTrackedImage.transform.rotation) * transform.rotation )
                                 );
-
-            //Debug.Log("sessionOrigin " + transform.position);
-
-            ARSessionOrigin sessionOrigin = GetComponent<ARSessionOrigin>();
-            debugTrackableParent.SetParent(sessionOrigin.trackablesParent);
-            debugTrackableParent.localPosition = Vector3.zero;
-            debugTrackableParent.localRotation = Quaternion.identity;
-            //sessionOrigin.camera = null;
-            //sessionOrigin.trackablesParent.position = transform.position;
-            //sessionOrigin.trackablesParent.rotation = transform.rotation;
-
-            //sessionOrigin.trackablesParent.SetPositionAndRotation(transform.position, transform.rotation);
-            //sessionOrigin.trackablesParent.localPosition = Vector3.zero;
-            //sessionOrigin.trackablesParent.localRotation = Quaternion.identity;
         }
     }
 }

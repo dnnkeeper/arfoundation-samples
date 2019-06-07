@@ -1,0 +1,16 @@
+{
+    "name": "XRLineRenderer.Editor",
+    "references": [
+        "GUID:40c3b8a23170862439a50d9d1ee13eab"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
