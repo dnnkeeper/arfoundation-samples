@@ -65,6 +65,7 @@ public class RigidbodyManipulator : MonoBehaviour
                     //_pathLineRenderer.widthStart = 0.02f;
                     //_pathLineRenderer.widthEnd = 0.02f;
                     _pathLineRenderer.SetVertexCount(20);
+                    _pathLineRenderer.widthMultiplier = 2f;
                     _pathLineRenderer.material = XRLineMaterial;
                 }
 
@@ -324,9 +325,9 @@ public class RigidbodyManipulator : MonoBehaviour
 
     //public float trackingForce = 10f;
 
-    public float maxVelocity = 10f;
+    public float maxVelocity = 4f;
 
-    public float maxForce = 5f;
+    public float maxForce = 100f;
 
     public float forceMultiplier = 1f;
 
@@ -501,7 +502,7 @@ public class RigidbodyManipulator : MonoBehaviour
         pointRenderer.transform.position = grabPoint;
     }
 
-    public float grabSphereRadius = 0.03f;
+    public float grabSphereRadius = 0.025f;
 
     private void OnDrawGizmosSelected()
     
