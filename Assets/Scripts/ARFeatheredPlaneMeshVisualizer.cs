@@ -43,6 +43,12 @@ public class ARFeatheredPlaneMeshVisualizer : MonoBehaviour
     void ARPlane_boundaryUpdated(ARPlaneBoundaryChangedEventArgs eventArgs)
     {
         GenerateBoundaryUVs(m_PlaneMeshVisualizer.mesh);
+
+        var wireframe = GetComponent<WireFrameRenderer>();
+        if (wireframe != null)
+        {
+            wireframe.Init();
+        }
     }
 
     /// <summary>

@@ -17,9 +17,9 @@ Shader "XRLineRenderer/MeshChain - Alpha Blended"
     SubShader
     {
         Tags{ "RenderType" = "Transparent" "Queue" = "Transparent" }
-        LOD 100
+        //LOD 100
 
-        // We don't want the line segments and caps to draw overtop
+        // We don't want the line segments and caps to draw overtop 
         // one another as it breaks the continous segment illusion
         // To alpha blend with the background, we use a two-pass technique
         Pass

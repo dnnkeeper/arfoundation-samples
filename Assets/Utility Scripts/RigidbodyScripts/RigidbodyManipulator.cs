@@ -137,7 +137,7 @@ public class RigidbodyManipulator : MonoBehaviour
     float originalDragAmount;
     float originalAngularDragAmount;
 
-    public bool grabByHitPoint;
+    public bool grabByHitPoint = true;
 
     public float dragAmount = 5f;
     public float angularDragAmount = 4f;

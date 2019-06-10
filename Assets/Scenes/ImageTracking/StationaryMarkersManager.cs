@@ -61,6 +61,10 @@ public class StationaryMarkersManager : MonoBehaviour
 
     void Awake()
     {
+        var cam = Camera.main;
+        cam.transform.localPosition = Vector3.zero;
+        cam.transform.localRotation = Quaternion.identity;
+
         virtualScenes = GameObject.FindGameObjectsWithTag("VirtualScene");
 
         if (!Application.isEditor)
@@ -144,7 +148,7 @@ public class StationaryMarkersManager : MonoBehaviour
 
                 if (trackedImage.transform.lossyScale != virtualMarker.transform.lossyScale)
                 {
-                    Debug.LogWarning("trackedImage scale "+ trackedImage.transform.lossyScale.ToString("F2")+" != "+ virtualMarker.transform.lossyScale.ToString("F2") + " of virtual marker! Positioning might become incorrect!");
+                    //Debug.LogWarning("trackedImage scale "+ trackedImage.transform.lossyScale.ToString("F2")+" != "+ virtualMarker.transform.lossyScale.ToString("F2") + " of virtual marker! Positioning might become incorrect!");
                     trackedImage.transform.localScale = virtualMarker.transform.lossyScale;
                 }
 
