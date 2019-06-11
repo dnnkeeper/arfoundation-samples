@@ -5,7 +5,7 @@ Shader "Custom/DepthMaskWithShadow" {
 	}
 	SubShader
 	{
-		Tags {"Queue" = "Geometry-10" }
+		Tags {"Queue" = "Geometry-10" "RenderType"="Opaque"}
 		ZTest LEqual
 		ZWrite On
 		Cull Back
@@ -18,7 +18,7 @@ Shader "Custom/DepthMaskWithShadow" {
 
 		Pass
 		{
-			Tags {"LightMode" = "ForwardBase" }
+			Tags { "LightMode" = "ForwardBase"  }
 			
 			Blend SrcAlpha OneMinusSrcAlpha
 			CGPROGRAM

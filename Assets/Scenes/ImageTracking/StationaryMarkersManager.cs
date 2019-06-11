@@ -6,6 +6,7 @@ using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.SpatialTracking;
 using UnityEngine.Events;
+using System.Collections;
 
 /// This component listens for images detected by the <c>XRImageTrackingSubsystem</c>
 /// and overlays some information as well as the source Texture2D on top of the
@@ -59,8 +60,31 @@ public class StationaryMarkersManager : MonoBehaviour
     public Dictionary<Guid, StationaryMarker> virtualMarkersDict
             = new Dictionary<Guid, StationaryMarker>();
 
+    IEnumerator waitForEnvManager()
+    {
+        AREnvironmentProbeManager EnvironmentProbeManager = GetComponent<AREnvironmentProbeManager>();
+
+        Debug.Log("Waiting for EnvironmentProbeManager ... ");
+
+        while (EnvironmentProbeManager == null)
+        {
+            yield return null;
+        }
+
+        Debug.Log("EnvironmentProbeManager found! ");
+
+        while ( EnvironmentProbeManager.subsystem == null)
+        {
+            yield return null;
+        }
+
+        Debug.Log("EnvironmentProbeManager.subsystem.supported : " + EnvironmentProbeManager.subsystem.supported);
+    }
+
     void Awake()
     {
+        StartCoroutine(waitForEnvManager());
+
         var cam = Camera.main;
         cam.transform.localPosition = Vector3.zero;
         cam.transform.localRotation = Quaternion.identity;

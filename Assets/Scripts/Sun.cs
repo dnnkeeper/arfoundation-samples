@@ -1,13 +1,25 @@
+using Reflector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Entropedia
 {
     [RequireComponent(typeof(Light))]
     public class Sun : MonoBehaviour
     {
+        public ReflectorProbe reflectionProbe;
+
+        public UnityEvent onUpdateSunRotation;
+
+        [SerializeField]
+        bool controlIntensity = true;
+
+        [SerializeField]
+        float intensityMultiplier = 1f;
+
         [SerializeField]
         float longitude;
 
@@ -138,10 +150,19 @@ namespace Entropedia
             time = time.AddSeconds(timeSpeed * Time.deltaTime);
             if (frameStep==0) {
                 SetPosition();
+                onUpdateSunRotation.Invoke();
+                RenderProbe();
             }
             frameStep = (frameStep + 1) % frameSteps;
 
 
+        }
+
+        [ContextMenu("RenderProbe")]
+        void RenderProbe()
+        {
+            if (reflectionProbe != null)
+                reflectionProbe.RefreshReflection();
         }
 
         void SetPosition()
@@ -154,7 +175,8 @@ namespace Entropedia
             angles.y = (float)azi * Mathf.Rad2Deg;
             //UnityEngine.Debug.Log(" sun angles:"+angles);
             transform.rotation = Quaternion.Euler(angles);
-            LightSource.intensity = Mathf.InverseLerp(-10f, 0f, angles.x);
+            if (controlIntensity)
+                LightSource.intensity = Mathf.InverseLerp(-10f, 0f, angles.x) * intensityMultiplier;
             //UnityEngine.Debug.Log(" LightSource.intensity: "+LightSource.intensity);
         }
 

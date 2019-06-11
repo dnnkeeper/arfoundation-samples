@@ -14,6 +14,16 @@ public class LightEstimation : MonoBehaviour
     [Tooltip("The ARCameraManager which will produce frame events containing light estimation information.")]
     ARCameraManager m_CameraManager;
 
+
+    /// <summary>
+    /// Affect only ambient color if False
+    /// </summary>
+    [SerializeField]
+    bool affectLightSource;
+
+    [SerializeField]
+    float ambientIntensityMultiplier = 0.5f;
+
     /// <summary>
     /// Get or set the <c>ARCameraManager</c>.
     /// </summary>
@@ -72,19 +82,30 @@ public class LightEstimation : MonoBehaviour
         if (args.lightEstimation.averageBrightness.HasValue)
         {
             brightness = args.lightEstimation.averageBrightness.Value;
-            m_Light.intensity = brightness.Value;
+
+            if (affectLightSource)
+                m_Light.intensity = brightness.Value;
+
+            //RenderSettings.ambientIntensity = brightness.Value * ambientIntensityMultiplier;
         }
 
         if (args.lightEstimation.averageColorTemperature.HasValue)
         {
             colorTemperature = args.lightEstimation.averageColorTemperature.Value;
-            m_Light.colorTemperature = colorTemperature.Value;
+
+            if (affectLightSource)
+                m_Light.colorTemperature = colorTemperature.Value;
         }
         
         if (args.lightEstimation.colorCorrection.HasValue)
         {
             colorCorrection = args.lightEstimation.colorCorrection.Value;
-            m_Light.color = colorCorrection.Value;
+
+            if (affectLightSource)
+                m_Light.color = colorCorrection.Value;
+
+            
+            RenderSettings.ambientLight = colorCorrection.Value * ambientIntensityMultiplier;
         }
     }
 
