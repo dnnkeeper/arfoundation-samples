@@ -152,9 +152,10 @@ namespace Entropedia
             SunPosition.CalculateSunPosition(time, (double)latitude, (double)longitude, out azi, out alt);
             angles.x = (float)alt * Mathf.Rad2Deg;
             angles.y = (float)azi * Mathf.Rad2Deg;
-            //UnityEngine.Debug.Log(angles);
+            //UnityEngine.Debug.Log(" sun angles:"+angles);
             transform.rotation = Quaternion.Euler(angles);
-            LightSource.intensity = Mathf.InverseLerp(-12, 0, angles.x);
+            LightSource.intensity = Mathf.InverseLerp(-10f, 0f, angles.x);
+            //UnityEngine.Debug.Log(" LightSource.intensity: "+LightSource.intensity);
         }
 
     }

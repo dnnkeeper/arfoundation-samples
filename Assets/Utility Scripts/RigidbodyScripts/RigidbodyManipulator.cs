@@ -41,6 +41,8 @@ public class RigidbodyManipulator : MonoBehaviour
 
     public Material XRLineMaterial;
 
+    public float defaultLineWidthMultiplier = 2f;
+
     private XRLineRenderer _pathLineRenderer;
     public XRLineRenderer pathLineRenderer
     {
@@ -64,8 +66,8 @@ public class RigidbodyManipulator : MonoBehaviour
                     //_pathLineRenderer.positionCount = 20;
                     //_pathLineRenderer.widthStart = 0.02f;
                     //_pathLineRenderer.widthEnd = 0.02f;
-                    _pathLineRenderer.SetVertexCount(20);
-                    _pathLineRenderer.widthMultiplier = 2f;
+                    _pathLineRenderer.SetVertexCount(40);
+                    _pathLineRenderer.widthMultiplier = defaultLineWidthMultiplier;
                     _pathLineRenderer.material = XRLineMaterial;
                 }
 
@@ -133,12 +135,21 @@ public class RigidbodyManipulator : MonoBehaviour
         }
     }
 
-    public Rigidbody selectedRigidbody;
+    private Rigidbody _selectedRigidbody;
+    public Rigidbody SelectedRigidbody
+    {
+        get
+        {
+            return _selectedRigidbody;
+        }
+    }
 
     float originalDragAmount;
     float originalAngularDragAmount;
 
     public bool grabByHitPoint = true;
+
+    public Vector3 grabPointOffset = Vector3.up * 0.1f;
 
     public float dragAmount = 5f;
     public float angularDragAmount = 4f;
@@ -146,12 +157,12 @@ public class RigidbodyManipulator : MonoBehaviour
 
     void DropCurrentItem()
     {
-        if (selectedRigidbody != null)
+        if (_selectedRigidbody != null)
         {
-            selectedRigidbody.angularDrag = originalAngularDragAmount;
-            selectedRigidbody.drag = originalDragAmount;
-            selectedRigidbody.SendMessage("OnDrop", SendMessageOptions.DontRequireReceiver);
-            selectedRigidbody = null;
+            _selectedRigidbody.angularDrag = originalAngularDragAmount;
+            _selectedRigidbody.drag = originalDragAmount;
+            _selectedRigidbody.SendMessage("OnDrop", SendMessageOptions.DontRequireReceiver);
+            _selectedRigidbody = null;
             rigidbodyLocalHitPoint = Vector3.zero;
         }
         pathLineRenderer.enabled = false;
@@ -196,16 +207,15 @@ public class RigidbodyManipulator : MonoBehaviour
 
                 Debug.Log("Manipulator ON");
 
-                selectedRigidbody = hitRigidbody;
+                _selectedRigidbody = hitRigidbody;
 
                 onGrab.Invoke();
 
-                
+                //Keep object attraction position in the same stop by which it was grabbed + grabPointOffset
 
-                cameraLocalTargetPosition = mainCamera.transform.InverseTransformPoint(hitPoint);
+                cameraLocalTargetPosition = mainCamera.transform.InverseTransformPoint(hitPoint) + grabPointOffset;
 
-                //float nearPushRadius = 0.3f;
-                float nearPushRadius = mainCamera.nearClipPlane + selectedRigidbody.GetComponent<Collider>().bounds.extents.magnitude;// + selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude;
+                float nearPushRadius = mainCamera.nearClipPlane + _selectedRigidbody.GetComponent<Collider>().bounds.extents.magnitude;// + selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude;
 
                 if (cameraLocalTargetPosition.magnitude < nearPushRadius)
                 {
@@ -224,11 +234,11 @@ public class RigidbodyManipulator : MonoBehaviour
 
                 rigidbodyLocalHitPoint = hitRigidbody.transform.InverseTransformPoint(hitPoint);
 
-                selectedRigidbody.drag = dragAmount;
+                _selectedRigidbody.drag = dragAmount;
 
-                selectedRigidbody.angularDrag = angularDragAmount;
+                _selectedRigidbody.angularDrag = angularDragAmount;
 
-                selectedRigidbody.SendMessage("OnGrab", SendMessageOptions.DontRequireReceiver);
+                _selectedRigidbody.SendMessage("OnGrab", SendMessageOptions.DontRequireReceiver);
 
                 //float nearPushRadius = mainCamera.nearClipPlane + selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude;
 
@@ -275,7 +285,7 @@ public class RigidbodyManipulator : MonoBehaviour
                         if (grabByHitPoint)
                         {
                             hitPoint = hit.point;
-                            //localGrabPosition = cam.transform.InverseTransformPoint(hitPoint);
+                            
                         }
                         else
                             hitPoint = rb.transform.position;
@@ -290,8 +300,8 @@ public class RigidbodyManipulator : MonoBehaviour
             }
         }
 
-        if (selectedRigidbody != null && !selectedRigidbody.gameObject.activeSelf)
-            selectedRigidbody = null;
+        if (_selectedRigidbody != null && !_selectedRigidbody.gameObject.activeSelf)
+            _selectedRigidbody = null;
 
         hitRigidbody = rb;
 
@@ -300,11 +310,11 @@ public class RigidbodyManipulator : MonoBehaviour
             Toggle();
         }
 
-        if (selectedRigidbody != null && !selectedRigidbody.isKinematic)
+        if (_selectedRigidbody != null && !_selectedRigidbody.isKinematic)
         {
             if (active)
             {
-                var collectable = selectedRigidbody.GetComponent<CollectableObject>();
+                var collectable = _selectedRigidbody.GetComponent<CollectableObject>();
                 if (collectable != null && collectable.canBePickedUp)
                     AttractSelectedItem();
 
@@ -355,20 +365,20 @@ public class RigidbodyManipulator : MonoBehaviour
     IEnumerator attractionRoutine()
     {
         Vector3 initialTargetPos = cameraLocalTargetPosition;
-        Vector3 grabPointWS = selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
+        Vector3 grabPointWS = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
         var cameraLocalTargetPositionOriginal = cameraLocalTargetPosition;
         float t = 0;
-        while (selectedRigidbody != null &&  t <= 1f )//(grabPointWS - manipulatorSocket.position).sqrMagnitude > 0.01f)
+        while (_selectedRigidbody != null &&  t <= 1f )//(grabPointWS - manipulatorSocket.position).sqrMagnitude > 0.01f)
         {
             t += Time.deltaTime * attractionSpeed;
-            grabPointWS = selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
+            grabPointWS = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
             cameraLocalTargetPosition = Vector3.Lerp(cameraLocalTargetPositionOriginal, Vector3.zero, Mathf.Clamp01(t));
             yield return null;
         }
 
-        if (selectedRigidbody != null)
+        if (_selectedRigidbody != null)
         {
-            selectedRigidbody.SendMessage("OnCollected", SendMessageOptions.DontRequireReceiver);
+            _selectedRigidbody.SendMessage("OnCollected", SendMessageOptions.DontRequireReceiver);
         }
 
         cameraLocalTargetPosition = initialTargetPos;
@@ -378,11 +388,11 @@ public class RigidbodyManipulator : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (active && selectedRigidbody != null)
+        if (active && _selectedRigidbody != null)
         {
             //hitRigidbody.AddForce( ( (cam.transform.position + cam.transform.forward) - hitRigidbody.position) * trackingForce);
 
-            Vector3 grabPoint = selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
+            Vector3 grabPoint = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
 
             Vector3 targetForce = ( GetGrabTargetPosition() - grabPoint) / Time.fixedDeltaTime;
 
@@ -399,8 +409,8 @@ public class RigidbodyManipulator : MonoBehaviour
             //{
             targetForce = targetForce * forceMultiplier;
             targetForce = Vector3.ClampMagnitude(targetForce, maxForce);
-                selectedRigidbody.AddForceAtPosition(targetForce, grabPoint, ForceMode.Force); //Vector3.MoveTowards(hitRigidbody.velocity, targetVelocity, Time.fixedDeltaTime * maxAcceleration)
-                selectedRigidbody.velocity = Vector3.ClampMagnitude(selectedRigidbody.velocity, maxVelocity);
+                _selectedRigidbody.AddForceAtPosition(targetForce, grabPoint, ForceMode.Force); //Vector3.MoveTowards(hitRigidbody.velocity, targetVelocity, Time.fixedDeltaTime * maxAcceleration)
+                _selectedRigidbody.velocity = Vector3.ClampMagnitude(_selectedRigidbody.velocity, maxVelocity);
             //}
 
             //targetVelocity.y = Mathf.Clamp(targetVelocity.y, 0f, maxVelocity);
@@ -408,20 +418,20 @@ public class RigidbodyManipulator : MonoBehaviour
             //rb.transform.forward * maxVelocity;
 
             //hitRigidbody.velocity = Vector3.MoveTowards(hitRigidbody.velocity, targetVelocity, Time.fixedDeltaTime * maxAcceleration);
-            Vector3 fromCameraToRb = selectedRigidbody.transform.position - mainCamera.transform.position;
-            if (fromCameraToRb.magnitude < mainCamera.nearClipPlane + selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude)
+            Vector3 fromCameraToRb = _selectedRigidbody.transform.position - mainCamera.transform.position;
+            if (fromCameraToRb.magnitude < mainCamera.nearClipPlane + _selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude)
             {
-                selectedRigidbody.position = mainCamera.transform.position + fromCameraToRb.normalized * (mainCamera.nearClipPlane + selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude);
-                selectedRigidbody.transform.position = selectedRigidbody.position;
+                _selectedRigidbody.position = mainCamera.transform.position + fromCameraToRb.normalized * (mainCamera.nearClipPlane + _selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude);
+                _selectedRigidbody.transform.position = _selectedRigidbody.position;
             }
         }
     }
 
     public Gradient colorGradient;
 
-    public float lineCurvePower = 4f;
+    public float lineCurvePower = 2f;
 
-    Vector3[] linePositions = new Vector3[20];
+    Vector3[] linePositions = new Vector3[40];
 
     //Vector3 grabPointToTargetPoint;
 
@@ -447,9 +457,14 @@ public class RigidbodyManipulator : MonoBehaviour
         //List<Vector3> corners = new List<Vector3>();
 
         if (manipulatorSocket == null)
-            manipulatorSocket = transform;
+        {
+            var manipulatorSocketGO = new GameObject("ManipulatorSocket");
+            manipulatorSocketGO.transform.parent = transform;
+            manipulatorSocketGO.transform.localPosition = new Vector3(0f, -0.1f, 0f);
+            manipulatorSocket = manipulatorSocketGO.transform;
+        }
 
-        Vector3 grabPoint = selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
+        Vector3 grabPoint = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
 
         float distance = (grabPoint - transform.position).magnitude;
 
@@ -457,7 +472,7 @@ public class RigidbodyManipulator : MonoBehaviour
 
         Vector3 linePos = manipulatorSocket.position;
 
-        grabDirection = GetGrabTargetPosition() - selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
+        grabDirection = GetGrabTargetPosition() - _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
 
         upMagnitude = Vector3.Project(grabDirection, Vector3.up).magnitude;
 
@@ -507,9 +522,9 @@ public class RigidbodyManipulator : MonoBehaviour
     private void OnDrawGizmosSelected()
     
     {
-        if (selectedRigidbody != null)
+        if (_selectedRigidbody != null)
         {
-            Vector3 grabPoint = selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
+            Vector3 grabPoint = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(grabPoint, grabSphereRadius);
             Gizmos.color = Color.yellow;
