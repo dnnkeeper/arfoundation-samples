@@ -89,13 +89,7 @@ public class StationaryMarkersManager : MonoBehaviour
         cam.transform.localPosition = Vector3.zero;
         cam.transform.localRotation = Quaternion.identity;
 
-        virtualScenes = GameObject.FindGameObjectsWithTag("VirtualScene");
-
-        if (!Application.isEditor)
-        {
-            SetVirtualSceneActive(false);
-            onZeroMarkers.Invoke();
-        }
+        
 
         m_TrackedImageManager = GetComponent<ARTrackedImageManager>();
 
@@ -116,6 +110,14 @@ public class StationaryMarkersManager : MonoBehaviour
             }
 
             virtualMarker.gameObject.SetActive(false);
+        }
+
+        virtualScenes = GameObject.FindGameObjectsWithTag("VirtualScene");
+
+        if (!Application.isEditor)
+        {
+            SetVirtualSceneActive(false);
+            onZeroMarkers.Invoke();
         }
     }
 
@@ -205,11 +207,11 @@ public class StationaryMarkersManager : MonoBehaviour
 
                     var correctedRotation = transform.rotation * Quaternion.Inverse(compassTransform.rotation);
 
-                    if (Quaternion.Angle(transform.rotation, correctedRotation) > 30f)
-                    {
-                        transform.rotation = correctedRotation;
-                    }
-                    else
+                    //if (Quaternion.Angle(transform.rotation, correctedRotation) > 30f)
+                    //{
+                    //    transform.rotation = correctedRotation;
+                    //}
+                    //else
                         transform.rotation = Quaternion.Lerp(transform.rotation, correctedRotation, Time.deltaTime);
                 }
             }

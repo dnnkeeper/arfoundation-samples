@@ -28,7 +28,7 @@ public class DetectedPlaneRaycaster : MonoBehaviour
         referencePointManager = GetComponent<ARReferencePointManager>();
     }
 
-    public void PlaceObjectOnHitPosition(Transform objectTransform)
+    public void AnchorObjectToHitPosition(Transform objectTransform)
     {
         if (RaycastFromCameraCenter(out List<ARRaycastHit> hitList))
         {
@@ -37,19 +37,28 @@ public class DetectedPlaneRaycaster : MonoBehaviour
             if (referencePointManager != null)
             {
                 var hitPlane = planeManager.GetPlane(hit.trackableId);
-                var referencePoint = referencePointManager.AttachReferencePoint(hitPlane, hit.pose);
-                objectTransform.SetParent(referencePoint.transform);
+                if (hitPlane != null)
+                {
+                    var referencePoint = objectTransform.GetComponentInParent<ARReferencePoint>();
+                    if (referencePoint == null || referencePoint.trackableId != hit.trackableId) {
+                        objectTransform.SetParent(null);
+                        if (referencePoint != null && referencePoint.transform.childCount == 0)
+                        {
+                            Debug.Log("Destroy old empty reference point");
+                            Destroy(referencePoint);
+                        }
+                        referencePoint = referencePointManager.AttachReferencePoint(hitPlane, hit.pose);
+                    }                        
+                    objectTransform.SetParent(referencePoint.transform);
+                }
+                else
+                {
+                    Debug.LogWarning("hit.trackableId "+ hit.trackableId+ " couldn't be found in "+planeManager);
+                }
             }
-            //var hitPlane = planeManager.GetPlane(hit.trackableId);
-            //if (hitPlane != null)
-            //{
-            //    objectTransform.SetParent(hitPlane.gameObject.transform);
-            //}
-            //else
-            //{
-            //    Debug.LogWarning("hitPlane == null but hit position was found");
-            //}
+            
             objectTransform.SetPositionAndRotation(hit.pose.position, hit.pose.rotation);
+            objectTransform.gameObject.SetActive(true);
         }
         else
         {

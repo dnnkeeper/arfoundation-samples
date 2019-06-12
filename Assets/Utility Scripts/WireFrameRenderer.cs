@@ -3,6 +3,7 @@ using System.Collections;
 
 public class WireFrameRenderer : MonoBehaviour {
 
+    [ColorUsage(true, true)]
 	public Color lineColor; 
 	//public Color backgroundColor; 
 	//public bool ZWrite = true; 
