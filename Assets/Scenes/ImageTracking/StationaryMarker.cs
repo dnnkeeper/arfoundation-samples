@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
 
-
 #if UNITY_EDITOR
+
 using UnityEditor;
 using System.IO;
+
 #endif
 
 [ExecuteInEditMode, SelectionBaseAttribute]
@@ -14,7 +13,7 @@ public class StationaryMarker : MonoBehaviour
 {
     public XRReferenceImageLibrary imageLibrary;
 
-    int _imageIndex;
+    private int _imageIndex;
     public int imageIndex;
 
 #if UNITY_EDITOR
@@ -26,9 +25,10 @@ public class StationaryMarker : MonoBehaviour
         UpdateImage(imageIndex);
     }
 
-    Transform imageGameObject;
+    private Transform imageGameObject;
 
     private Material _imageMaterial;
+
     private Material imageMaterial
     {
         get
@@ -54,7 +54,6 @@ public class StationaryMarker : MonoBehaviour
                     AssetDatabase.CreateAsset(_imageMaterial, Path.GetDirectoryName(AssetDatabase.GetAssetPath(imageLibrary)) + "/" + name + ".mat");
 #endif
                 }
-
             }
             return _imageMaterial;
         }
@@ -86,7 +85,6 @@ public class StationaryMarker : MonoBehaviour
                 {
                     //imageGameObject.localScale = new Vector3(imgInfo.width, imgInfo.width * imgInfo.texture.height / imgInfo.texture.width, 1f);
                     transform.localScale = new Vector3(imgInfo.width, 1f, imgInfo.width * imgInfo.texture.height / imgInfo.texture.width);
-
                 }
                 Debug.Log("imgInfo.width " + imgInfo.width);
             }
@@ -102,7 +100,6 @@ public class StationaryMarker : MonoBehaviour
         }
     }
 
-    
     private void Update()
     {
         if (_imageIndex != imageIndex)
@@ -119,5 +116,6 @@ public class StationaryMarker : MonoBehaviour
             transform.position = imageGameObject.TransformPoint(localPos);
         }
     }
+
 #endif
 }

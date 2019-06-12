@@ -1,14 +1,13 @@
-using UnityEngine;
-using System.Collections;
 using Newtonsoft.Json;
+using System.Collections;
+using UnityEngine;
 using UnityEngine.Networking;
-
 
 /// <summary>
 /// The Geo data for a user.
-/// 
+///
 /// http://ip-api.com/docs/api:json
-/// 
+///
 /// <code>
 /// {
 /// 	"status": "success",
@@ -27,20 +26,20 @@ using UnityEngine.Networking;
 /// 	"query": "IP ADDRESS USED FOR QUERY"
 /// }
 /// </code>
-/// 
+///
 /// </summary>
-public class GeoData 
+public class GeoData
 {
-	/// <summary>
-	/// The status that is returned if the response was successful.
-	/// </summary>
-	public const string SuccessResult = "success";
+    /// <summary>
+    /// The status that is returned if the response was successful.
+    /// </summary>
+    public const string SuccessResult = "success";
 
-	[JsonProperty("status")]
-	public string Status { get; set; }
+    [JsonProperty("status")]
+    public string Status { get; set; }
 
-	[JsonProperty("country")]
-	public string Country { get; set; }
+    [JsonProperty("country")]
+    public string Country { get; set; }
 
     [JsonProperty("lat")]
     public float lat { get; set; }
@@ -49,16 +48,16 @@ public class GeoData
     public float lon { get; set; }
 
     [JsonProperty("query")]
-	public string IpAddress { get; set; }
+    public string IpAddress { get; set; }
 }
 
-public class GeoCountry : MonoBehaviour {
-
+public class GeoCountry : MonoBehaviour
+{
     public float lat, lon;
 
     public bool isInProgress = true;
 
-    IEnumerator GetGeoData()
+    private IEnumerator GetGeoData()
     {
         isInProgress = true;
         UnityWebRequest www = UnityWebRequest.Get("http://ip-api.com/json");
@@ -80,7 +79,6 @@ public class GeoCountry : MonoBehaviour {
             // Ensure successful
             if (data.Status != GeoData.SuccessResult)
             {
-
                 // TODO: Hook into an auto retry case
 
                 Debug.LogError("Unsuccessful geo data request: " + results);
@@ -98,12 +96,13 @@ public class GeoCountry : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
+    private void Start()
+    {
         StartCoroutine(GetGeoData());
-	}
+    }
 
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    // Update is called once per frame
+    private void Update()
+    {
+    }
 }

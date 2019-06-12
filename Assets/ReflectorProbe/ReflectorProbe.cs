@@ -247,7 +247,8 @@ namespace Reflector
         [ContextMenu("RefreshReflection")]
         public void RefreshReflection()
         {
-            RefreshReflectionAt(RefreshMode.Instant, transform.position);
+            if (isActiveAndEnabled)
+                RefreshReflectionAt(RefreshMode.Instant, transform.position);
         }
 
         public void RefreshReflection(RefreshMode refresh = RefreshMode.Default)

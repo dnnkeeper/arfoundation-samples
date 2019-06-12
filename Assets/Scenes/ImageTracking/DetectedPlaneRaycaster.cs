@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR.ARFoundation;
@@ -16,13 +14,13 @@ public class DetectedPlaneRaycaster : MonoBehaviour
     public UnityPositionRotationEvent onHitPlane;
     public UnityEvent onMiss;
 
-    ARPlaneManager planeManager;
-    ARSessionOrigin sessionOrigin;
-    ARRaycastManager raycastManager;
-    ARReferencePointManager referencePointManager;
+    private ARPlaneManager planeManager;
+    private ARSessionOrigin sessionOrigin;
+    private ARRaycastManager raycastManager;
+    private ARReferencePointManager referencePointManager;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         planeManager = GetComponent<ARPlaneManager>();
         sessionOrigin = GetComponent<ARSessionOrigin>();
@@ -60,7 +58,7 @@ public class DetectedPlaneRaycaster : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (RaycastFromCameraCenter(out List<ARRaycastHit> hitList))
         {
@@ -74,7 +72,7 @@ public class DetectedPlaneRaycaster : MonoBehaviour
         }
     }
 
-    bool RaycastFromCameraCenter(out List<ARRaycastHit> hitList, TrackableType trackableTypeFilter = TrackableType.PlaneWithinBounds)
+    private bool RaycastFromCameraCenter(out List<ARRaycastHit> hitList, TrackableType trackableTypeFilter = TrackableType.PlaneWithinBounds)
     {
         hitList = null;
         var camera = sessionOrigin.camera;

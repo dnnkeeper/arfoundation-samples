@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SetRotation : MonoBehaviour
 {
+    public bool localRotation;
+
     public Vector3 targetRotation;
 
     public Vector3 multiplier = new Vector3(1,1,1);
@@ -13,6 +15,9 @@ public class SetRotation : MonoBehaviour
     { 
         var myRot = transform.rotation.eulerAngles;
         var rot = new Vector3( Mathf.Lerp(myRot.x, targetRotation.x, multiplier.x), Mathf.Lerp(myRot.y, targetRotation.y, multiplier.y), Mathf.Lerp(myRot.z, targetRotation.z, multiplier.z));
-        transform.rotation = Quaternion.Euler(rot);
+        if (localRotation)
+            transform.localRotation = Quaternion.Euler(rot);
+        else
+            transform.rotation = Quaternion.Euler(rot);
     }
 }

@@ -55,3 +55,13 @@ MonoBehaviour:
     m_SpecifySize: 1
     m_Name: SciFiMarker16
     m_Texture: {fileID: 2800000, guid: 2642a67fc4d62b04a853043232190234, type: 3}
+  - m_SerializedGuid:
+      m_GuidLow: 5275950372311547577
+      m_GuidHigh: 2063637170610556336
+    m_SerializedTextureGuid:
+      m_GuidLow: 7017785008778446946
+      m_GuidHigh: 1087826967233590648
+    m_Size: {x: 0.18, y: 0.18}
+    m_SpecifySize: 1
+    m_Name: SciFiMarker17
+    m_Texture: {fileID: 2800000, guid: 9e4d08622e48616478750cf7dcbc180f, type: 3}
