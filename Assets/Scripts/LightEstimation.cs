@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
 
 /// <summary>
@@ -15,13 +16,18 @@ public class LightEstimation : MonoBehaviour
     ARCameraManager m_CameraManager;
 
 
+    public float intensityMultiplier = 1f;
+    public float ambientIntensityMultiplier = 1f;
+
     /// <summary>
     /// Affect only ambient color if False
     /// </summary>
     public bool affectLightSource;
 
+    public AmbientMode ambientMode = AmbientMode.Trilight;
+
     [SerializeField]
-    float ambientIntensityMultiplier = 0.5f;
+    Vector3 ambientGradientMultiplier = new Vector3(1.0f, 0.5f, 0.1f);
 
     /// <summary>
     /// Get or set the <c>ARCameraManager</c>.
@@ -66,6 +72,7 @@ public class LightEstimation : MonoBehaviour
 
     void OnEnable()
     {
+        RenderSettings.ambientMode = ambientMode;
         if (m_CameraManager != null)
             m_CameraManager.frameReceived += FrameChanged;
     }
@@ -83,9 +90,9 @@ public class LightEstimation : MonoBehaviour
             brightness = args.lightEstimation.averageBrightness.Value;
 
             if (affectLightSource)
-                m_Light.intensity = brightness.Value;
+                m_Light.intensity = brightness.Value * intensityMultiplier;
 
-            //RenderSettings.ambientIntensity = brightness.Value * ambientIntensityMultiplier;
+            RenderSettings.ambientIntensity = brightness.Value * ambientIntensityMultiplier;
         }
 
         if (args.lightEstimation.averageColorTemperature.HasValue)
@@ -95,7 +102,7 @@ public class LightEstimation : MonoBehaviour
             if (affectLightSource)
                 m_Light.colorTemperature = colorTemperature.Value;
         }
-        
+
         if (args.lightEstimation.colorCorrection.HasValue)
         {
             colorCorrection = args.lightEstimation.colorCorrection.Value;
@@ -103,8 +110,17 @@ public class LightEstimation : MonoBehaviour
             if (affectLightSource)
                 m_Light.color = colorCorrection.Value;
 
-            
-            RenderSettings.ambientLight = colorCorrection.Value * ambientIntensityMultiplier;
+            if (args.lightEstimation.averageBrightness.HasValue)
+            {
+                var brightness = args.lightEstimation.averageBrightness.Value * ambientIntensityMultiplier;
+                colorCorrection *= brightness;
+            }
+
+            RenderSettings.ambientLight = colorCorrection.Value * ambientGradientMultiplier.x;
+            RenderSettings.ambientSkyColor = colorCorrection.Value * ambientGradientMultiplier.x;
+            RenderSettings.ambientEquatorColor = colorCorrection.Value * ambientGradientMultiplier.y;
+            RenderSettings.ambientGroundColor = colorCorrection.Value * ambientGradientMultiplier.z;
+
         }
     }
 
