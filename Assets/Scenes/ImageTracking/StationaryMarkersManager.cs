@@ -246,8 +246,6 @@ public class StationaryMarkersManager : MonoBehaviour
         }
     }
 
-    public Transform debugTrackableParent;
-
     void SyncOffset()
     {
         if (lastTrackedMarker != null && lastTrackedImage != null)

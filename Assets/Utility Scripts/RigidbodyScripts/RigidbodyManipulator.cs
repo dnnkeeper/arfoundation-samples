@@ -5,44 +5,52 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Camera))]
 public class RigidbodyManipulator : MonoBehaviour
 {
-    public float angularDragAmount = 4f;
-    public float attractionSpeed = 2f;
-    public float breakHeight = 0.5f;
-    public Vector3 cameraLocalTargetPosition = new Vector3(0, 0, 1);
-    public Gradient colorGradient;
-    public bool compensateGravity = false;
-    public float defaultLineWidthMultiplier = 2f;
-    public float dragAmount = 5f;
+    public Transform manipulatorSocket;
 
+    public LayerMask raycastCollisionLayers = 1;
+    public float raycastRadius = 0.1f;
+    public float maxRayDistance = 2f;
+
+    [Header("Grabbed Object Properties")]
+
+    public Vector3 cameraLocalTargetPosition = new Vector3(0, 0, 1);
+    public Vector3 grabPointOffset = Vector3.up * 0.1f;
+    public float dragAmount = 5f;
+    public float angularDragAmount = 4f;
+    public float breakHeight = 0.5f;
+    public float forceMultiplier = 1f;
+    public float maxForce = 100f;
+    public float maxVelocity = 4f;
+
+    public bool grabByHitPoint = true;
+    public bool useForce = true;
+    public bool compensateGravity = false;
+
+    public float attractionSpeed = 2f;
+
+    [Header("XR Line Settings")]
+    public Material XRLineMaterial;
+    public Gradient colorGradient;
+    public float defaultLineWidthMultiplier = 2f;
+    public int lineVertexCount = 20;
+    public float grabSphereRadius = 0.025f;
+    public float lineCurvePower = 2f;
+
+    [ColorUsageAttribute(true, true)]
+    public Color startHDRColor = new Color32(0, 54, 191, 255);
     [ColorUsageAttribute(true, true)]
     public Color endHDRColor = new Color32(191, 0, 0, 255);
 
-    public float forceMultiplier = 1f;
-    public bool grabByHitPoint = true;
-    public Vector3 grabDirection;
-    public Vector3 grabPointOffset = Vector3.up * 0.1f;
-    public float grabSphereRadius = 0.025f;
-    public float lineCurvePower = 2f;
-    public int lineVertexCount = 20;
-    public Transform manipulatorSocket;
-    public float maxForce = 100f;
-    public float maxRayDistance = 2f;
-    public float maxVelocity = 4f;
     public UnityEvent onBreak;
     public UnityEvent onDrop;
     public UnityEvent onGrab;
     public UnityEvent onHasTarget;
     public UnityEvent onLostTarget;
     public UnityEvent onZeroTarget;
-    public LayerMask raycastCollisionLayers = 1;
-    public float raycastRadius = 0.1f;
 
-    [ColorUsageAttribute(true, true)]
-    public Color startHDRColor = new Color32(0, 54, 191, 255);
+    private Vector3 grabDirection;
 
-    public bool useForce = true;
-    public Material XRLineMaterial;
-    protected Transform oldObjectParent;
+    private Transform oldObjectParent;
     private Camera _cam;
     private Rigidbody _hitRigidbody;
     private XRLineRenderer _pathLineRenderer;
@@ -50,21 +58,13 @@ public class RigidbodyManipulator : MonoBehaviour
 
     private Rigidbody _selectedRigidbody;
     private bool active;
-
     private Coroutine attractionCoroutine;
-
     private Vector3 cameraWorldSpaceTargetPosition;
-
     private Vector3 hitPoint, rigidbodyLocalHitPoint;
-
     private Vector3[] linePositions;
-
     private float originalAngularDragAmount;
-
     private float originalDragAmount;
-
     private RigidbodyInterpolation origObjectInterpolation;
-
     private float upMagnitude;
 
     public Rigidbody hitRigidbody
@@ -173,13 +173,9 @@ public class RigidbodyManipulator : MonoBehaviour
         if (active)
         {
             active = false;
-
             Debug.Log("Manipulator OFF");
-
             onDrop.Invoke();
-
             DropCurrentItem();
-
             if (hitRigidbody == null)
             {
                 Debug.Log("Manipulator Lost Target", gameObject);
@@ -191,42 +187,25 @@ public class RigidbodyManipulator : MonoBehaviour
             if (hitRigidbody != null)
             {
                 active = true;
-
                 Debug.Log("Manipulator ON GRAB " + hitRigidbody);
-
                 _selectedRigidbody = hitRigidbody;
-
                 onGrab.Invoke();
-
                 cameraWorldSpaceTargetPosition = GetGrabTargetPosition();
-
                 origObjectInterpolation = _selectedRigidbody.interpolation;
-
                 //Keep object attraction position in the same stop by which it was grabbed + grabPointOffset
-
                 cameraLocalTargetPosition = mainCamera.transform.InverseTransformPoint(hitPoint) + grabPointOffset;
-
                 float nearPushRadius = mainCamera.nearClipPlane + _selectedRigidbody.GetComponent<Collider>().bounds.extents.magnitude;// + selectedRigidbody.GetComponent<Collider>().bounds.size.magnitude;
-
                 if (cameraLocalTargetPosition.magnitude < nearPushRadius)
                 {
                     cameraLocalTargetPosition = cameraLocalTargetPosition.normalized * nearPushRadius;
                 }
-
                 pathLineRenderer.enabled = true;
-
                 pointRenderer.SetActive(true);
-
                 originalDragAmount = hitRigidbody.drag;
-
                 originalAngularDragAmount = hitRigidbody.angularDrag;
-
                 rigidbodyLocalHitPoint = hitRigidbody.transform.InverseTransformPoint(hitPoint);
-
                 _selectedRigidbody.drag = dragAmount;
-
                 _selectedRigidbody.angularDrag = angularDragAmount;
-
                 _selectedRigidbody.SendMessage("OnGrab", SendMessageOptions.DontRequireReceiver);
             }
         }
@@ -252,7 +231,6 @@ public class RigidbodyManipulator : MonoBehaviour
         }
 
         cameraLocalTargetPosition = initialTargetPos;
-
         attractionCoroutine = null;
     }
 
@@ -267,23 +245,14 @@ public class RigidbodyManipulator : MonoBehaviour
         }
 
         Vector3 grabPoint = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
-
         float distance = (grabPoint - transform.position).magnitude;
-
         int c = pathLineRenderer.GetPositions(linePositions);
-
         Vector3 linePos = manipulatorSocket.position;
-
         grabDirection = GetGrabTargetPositionSmooth() - _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
-
         upMagnitude = Vector3.Project(grabDirection, Vector3.up).magnitude;
-
         float progressToBreak = Mathf.Clamp01(upMagnitude / breakHeight);
-
         pathLineRenderer.material.color = (Color.Lerp(startHDRColor, endHDRColor, progressToBreak));
-
         pathLineRenderer.widthStart = Mathf.Lerp(0.002f, 0.001f, progressToBreak);
-
         pathLineRenderer.widthEnd = Mathf.Lerp(0.01f, 0.001f, progressToBreak);
 
         if (upMagnitude > breakHeight)
@@ -305,7 +274,6 @@ public class RigidbodyManipulator : MonoBehaviour
         }
 
         pathLineRenderer.SetPositions(linePositions);
-
         pointRenderer.transform.position = grabPoint;
     }
 
@@ -314,7 +282,6 @@ public class RigidbodyManipulator : MonoBehaviour
         if (_selectedRigidbody != null)
         {
             Debug.Log("DropCurrentItem " + _selectedRigidbody);
-
             _selectedRigidbody.interpolation = origObjectInterpolation;
             _selectedRigidbody.angularDrag = originalAngularDragAmount;
             _selectedRigidbody.drag = originalDragAmount;
@@ -322,6 +289,7 @@ public class RigidbodyManipulator : MonoBehaviour
             _selectedRigidbody = null;
             rigidbodyLocalHitPoint = Vector3.zero;
         }
+
         pathLineRenderer.enabled = false;
         pointRenderer.SetActive(false);
     }
@@ -337,7 +305,6 @@ public class RigidbodyManipulator : MonoBehaviour
             if (useForce)
             {
                 Vector3 grabPoint = _selectedRigidbody.transform.TransformPoint(rigidbodyLocalHitPoint);
-
                 Vector3 targetForce = (GetGrabTargetPositionSmooth() - grabPoint) / Time.fixedDeltaTime;
 
                 if (compensateGravity && _selectedRigidbody.useGravity)
@@ -417,9 +384,7 @@ public class RigidbodyManipulator : MonoBehaviour
     {
         var rayOrigin = mainCamera.transform.position;
         var rayDir = mainCamera.transform.forward;
-
         Rigidbody rb = null;
-
         RaycastHit hit;
 
         if (Physics.SphereCast(rayOrigin, raycastRadius, rayDir, out hit, maxRayDistance, raycastCollisionLayers))

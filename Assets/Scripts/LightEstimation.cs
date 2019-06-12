@@ -18,8 +18,7 @@ public class LightEstimation : MonoBehaviour
     /// <summary>
     /// Affect only ambient color if False
     /// </summary>
-    [SerializeField]
-    bool affectLightSource;
+    public bool affectLightSource;
 
     [SerializeField]
     float ambientIntensityMultiplier = 0.5f;
