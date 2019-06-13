@@ -222,26 +222,18 @@ public class StationaryMarkersManager : MonoBehaviour
 
             if (markersCount <= 0)
             {
+                var camPlanarRotation = Quaternion.LookRotation(Vector3.Cross(camera.transform.right, Vector3.up), Vector3.up);
+
+                var rotationY = camPlanarRotation.eulerAngles.y - headingSmooth;
+
                 if (compassTransform != null)
+                        compassTransform.rotation = Quaternion.Euler(0f, rotationY, 0f);//Quaternion.Lerp(compassTransform.rotation, Quaternion.Euler(0f, rotationY, 0f), Time.deltaTime);
+
+                if (Input.compass.headingAccuracy > 0 && Input.compass.headingAccuracy < 5f)
                 {
+                    var correctedRotation = transform.rotation * Quaternion.Inverse(compassTransform.rotation);
 
-                    var camPlanarRotation = Quaternion.LookRotation(Vector3.Cross(camera.transform.right, Vector3.up), Vector3.up);
-
-                    var rotationY = camPlanarRotation.eulerAngles.y - headingSmooth;
-
-                    compassTransform.rotation = Quaternion.Euler(0f, rotationY, 0f);//Quaternion.Lerp(compassTransform.rotation, Quaternion.Euler(0f, rotationY, 0f), Time.deltaTime);
-
-                    if (Input.compass.headingAccuracy > 0 && Input.compass.headingAccuracy < 5f)
-                    {
-                        var correctedRotation = transform.rotation * Quaternion.Inverse(compassTransform.rotation);
-
-                        //if (Quaternion.Angle(transform.rotation, correctedRotation) > 30f)
-                        //{
-                        //    transform.rotation = correctedRotation;
-                        //}
-                        //else
-                        transform.rotation = correctedRotation;//Quaternion.Lerp(transform.rotation, correctedRotation, Time.deltaTime * 2f);
-                    }
+                    transform.rotation = correctedRotation;
                 }
             }
         }
