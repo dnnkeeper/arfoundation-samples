@@ -42,6 +42,8 @@ public class StationaryMarkersManager : MonoBehaviour
         }
     }
 
+    
+
     GameObject[] virtualScenes;
 
     public void SetVirtualSceneActive(bool b)
@@ -132,15 +134,32 @@ public class StationaryMarkersManager : MonoBehaviour
     }
 
     StationaryMarker lastTrackedMarker;
+    public StationaryMarker LastTrackedMarker { get => lastTrackedMarker; }
 
     ARTrackedImage lastTrackedImage;
+    public ARTrackedImage LastTrackedImage { get => lastTrackedImage; }
 
     List<ARTrackedImage> trackedImages = new List<ARTrackedImage>();
 
+    private Vector3 driftVector;
+    public Vector3 DriftVector
+    {
+        get
+        {
+            return driftVector;
+        }
+    }
+    private float driftMagnitude;
+    public float DriftMagnitude
+    {
+        get
+        {
+            return driftMagnitude;
+        }
+    }
+
     void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs eventArgs)
     {
-
-
         foreach (var trackedImage in eventArgs.added)
         {
             if (!trackedImages.Contains(trackedImage))
@@ -149,9 +168,10 @@ public class StationaryMarkersManager : MonoBehaviour
             // Give the initial image a reasonable default scale
             trackedImage.transform.localScale = new Vector3(0.01f, 1f, 0.01f);
 
-            Debug.Log("virtualMarker found! " + trackedImage.referenceImage.name + " guid: " + trackedImage.referenceImage.guid);
+            Debug.Log("trackedImage added! " + trackedImage.referenceImage.name + " guid: " + trackedImage.referenceImage.guid);
 
             MatchImageWithMarker(trackedImage);
+            
         }
 
         foreach (var trackedImage in eventArgs.updated)
@@ -230,7 +250,7 @@ public class StationaryMarkersManager : MonoBehaviour
             MatchImageWithMarker(lastTrackedImage);
     }
 
-    void MatchImageWithMarker(ARTrackedImage trackedImage)
+    StationaryMarker MatchImageWithMarker(ARTrackedImage trackedImage)
     {
         StationaryMarker virtualMarker;
 
@@ -255,6 +275,12 @@ public class StationaryMarkersManager : MonoBehaviour
                 virtualMarker.gameObject.SetActive(false);
             }
         }
+        else
+        {
+            Debug.LogWarning("Image " + trackedImage.referenceImage.name + " has no corresponding StationaryMarker!");
+        }
+
+        return virtualMarker;
     }
 
     void SyncOffset()
@@ -280,9 +306,21 @@ public class StationaryMarkersManager : MonoBehaviour
                 lastTrackedImage.transform.rotation = Quaternion.Euler(virtualMarkerRotationEuler.x, centerPoseRotationEuler.y, virtualMarkerRotationEuler.z);
             }
 
+            var correctedWorldOriginPos = lastTrackedMarker.transform.TransformPoint(lastTrackedImage.transform.InverseTransformPoint(transform.position));
+            var correctedWorldOriginRot = lastTrackedMarker.transform.rotation * (Quaternion.Inverse(lastTrackedImage.transform.rotation) * transform.rotation);
+
+            //Drift measurement
+            driftVector = correctedWorldOriginPos - transform.position;
+            var driftRotation = Quaternion.Angle(transform.rotation, correctedWorldOriginRot);
+            driftMagnitude = driftVector.magnitude;
+            if (driftMagnitude >= 0.01f)
+            {
+                Debug.Log("Drift: " + driftMagnitude.ToString("0.000m") + " " + driftVector+" "+ driftRotation+" deg");
+            }
+
             transform.SetPositionAndRotation(
-                                lastTrackedMarker.transform.TransformPoint(lastTrackedImage.transform.InverseTransformPoint(transform.position)),
-                                lastTrackedMarker.transform.rotation * (Quaternion.Inverse(lastTrackedImage.transform.rotation) * transform.rotation)
+                                correctedWorldOriginPos,
+                                correctedWorldOriginRot
                                 );
         }
     }
