@@ -183,6 +183,12 @@ public class StationaryMarkersManager : MonoBehaviour
 
     private void Update()
     {
+        if (!Input.compass.enabled)
+        {
+            Input.location.Start();
+            Input.compass.enabled = true;
+        }
+
         headingSmooth = Mathf.Lerp(headingSmooth, Input.compass.trueHeading, Time.deltaTime);
         if (!Application.isEditor)
         {
@@ -201,18 +207,21 @@ public class StationaryMarkersManager : MonoBehaviour
 
                     var camPlanarRotation = Quaternion.LookRotation(Vector3.Cross(camera.transform.right, Vector3.up), Vector3.up);
 
-                    var rotationY = camPlanarRotation.eulerAngles.y - Input.compass.trueHeading;
+                    var rotationY = camPlanarRotation.eulerAngles.y - headingSmooth;
 
                     compassTransform.rotation = Quaternion.Euler(0f, rotationY, 0f);//Quaternion.Lerp(compassTransform.rotation, Quaternion.Euler(0f, rotationY, 0f), Time.deltaTime);
 
-                    var correctedRotation = transform.rotation * Quaternion.Inverse(compassTransform.rotation);
+                    if (Input.compass.headingAccuracy > 0 && Input.compass.headingAccuracy < 5f)
+                    {
+                        var correctedRotation = transform.rotation * Quaternion.Inverse(compassTransform.rotation);
 
-                    //if (Quaternion.Angle(transform.rotation, correctedRotation) > 30f)
-                    //{
-                    //    transform.rotation = correctedRotation;
-                    //}
-                    //else
-                        transform.rotation = Quaternion.Lerp(transform.rotation, correctedRotation, Time.deltaTime);
+                        //if (Quaternion.Angle(transform.rotation, correctedRotation) > 30f)
+                        //{
+                        //    transform.rotation = correctedRotation;
+                        //}
+                        //else
+                        transform.rotation = correctedRotation;//Quaternion.Lerp(transform.rotation, correctedRotation, Time.deltaTime * 2f);
+                    }
                 }
             }
         }
@@ -280,6 +289,7 @@ public class StationaryMarkersManager : MonoBehaviour
 
     void OnGUI()
     {
+        GUILayout.Label("compass accuracy: "+Input.compass.headingAccuracy.ToString("F2"));
         GUILayout.Label("markersCount: " + markersCount);
         foreach (var trackedImage in trackedImages)
         {

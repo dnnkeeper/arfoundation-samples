@@ -23,10 +23,13 @@ public class ARFeatheredPlaneMeshVisualizer : MonoBehaviour
         set { m_FeatheringWidth = value; } 
     }
 
+    MeshRenderer meshRenderer;
+
     void Awake()
     {
         m_PlaneMeshVisualizer = GetComponent<ARPlaneMeshVisualizer>();
-        m_FeatheredPlaneMaterial = GetComponent<MeshRenderer>().material;
+        meshRenderer = GetComponent<MeshRenderer>();
+        //m_FeatheredPlaneMaterial = GetComponent<MeshRenderer>().material;
         m_Plane = GetComponent<ARPlane>();
     }
 
@@ -94,8 +97,10 @@ public class ARFeatheredPlaneMeshVisualizer : MonoBehaviour
             s_FeatheringUVs.Add(uv);
         }
 
-        m_FeatheredPlaneMaterial.SetFloat("_ShortestUVMapping", shortestUVMapping);
-
+        foreach(Material m_FeatheredPlaneMaterial in meshRenderer.materials)
+        {
+            m_FeatheredPlaneMaterial.SetFloat("_ShortestUVMapping", shortestUVMapping);
+        }
         // Add the center vertex UV
         uv.Set(0, 0, 0);
         s_FeatheringUVs.Add(uv);
@@ -112,5 +117,5 @@ public class ARFeatheredPlaneMeshVisualizer : MonoBehaviour
 
     ARPlane m_Plane;
 
-    Material m_FeatheredPlaneMaterial;
+    //Material m_FeatheredPlaneMaterial;
 }
