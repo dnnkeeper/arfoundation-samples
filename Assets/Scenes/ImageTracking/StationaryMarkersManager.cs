@@ -194,7 +194,11 @@ public class StationaryMarkersManager : MonoBehaviour
                 activeTrackedImagesCount++;
             }
         }
-        markersCount = activeTrackedImagesCount;
+
+        if (m_TrackedImageManager.subsystem.running)
+            markersCount = activeTrackedImagesCount;
+        else
+            markersCount = 0;
     }
 
     public Transform compassTransform;

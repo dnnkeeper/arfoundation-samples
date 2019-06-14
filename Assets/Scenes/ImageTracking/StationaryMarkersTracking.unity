@@ -13524,6 +13524,11 @@ PrefabInstance:
       propertyPath: compassTransform
       value: 
       objectReference: {fileID: 1506774493}
+    - target: {fileID: 5434198746073816346, guid: 586d0922778a9ed49ab1985894c80a60,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5434198745266637151, guid: 586d0922778a9ed49ab1985894c80a60,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -13534,5 +13539,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgument
       value: 
       objectReference: {fileID: 1422013798}
+    - target: {fileID: 5434198746712663429, guid: 586d0922778a9ed49ab1985894c80a60,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 586d0922778a9ed49ab1985894c80a60, type: 3}
