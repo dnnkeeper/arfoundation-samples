@@ -12724,7 +12724,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 2
+  m_BounceIntensity: 3
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -12776,7 +12776,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34890b897de52f846825f77950490116, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reflectionProbe: {fileID: 2064120075}
   onUpdateSunRotation:
     m_PersistentCalls:
       m_Calls: []

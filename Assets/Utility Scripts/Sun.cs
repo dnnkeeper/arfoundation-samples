@@ -1,4 +1,4 @@
-using Reflector;
+//using Reflector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace Entropedia
     [RequireComponent(typeof(Light))]
     public class Sun : MonoBehaviour
     {
-        public ReflectorProbe reflectionProbe;
+        //public ReflectorProbe reflectionProbe;
 
         public UnityEvent onUpdateSunRotation;
 
@@ -161,8 +161,8 @@ namespace Entropedia
         [ContextMenu("RenderProbe")]
         void RenderProbe()
         {
-            if (reflectionProbe != null)
-                reflectionProbe.RefreshReflection();
+            //if (reflectionProbe != null)
+            //    reflectionProbe.RefreshReflection();
         }
 
         void SetPosition()
