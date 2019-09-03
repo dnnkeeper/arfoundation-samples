@@ -15,6 +15,12 @@ public class DestroyTimer : MonoBehaviour {
             Destroy(gameObject, timeToDestroy);
 	}
 
+    public void DestroyNow()
+    {
+        onDestroy.Invoke();
+        GameObject.Destroy(gameObject);
+    }
+
     private void OnDestroy()
     {
         onDestroy.Invoke();

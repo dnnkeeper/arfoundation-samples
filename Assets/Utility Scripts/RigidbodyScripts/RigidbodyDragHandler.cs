@@ -74,11 +74,14 @@ namespace Utility.PhysicsUtils
 
                 VibrationHelper.Vibrate(16);
 
-                useGravity = rb.useGravity;
+                if (rb != null)
+                {
+                    useGravity = rb.useGravity;
+
+                    rb.useGravity = false;
+                }
 
                 targetPosition = transform.position;
-
-                rb.useGravity = false;
 
                 beginDragPos = eventData.pointerCurrentRaycast.worldPosition;
 
@@ -107,7 +110,8 @@ namespace Utility.PhysicsUtils
             if (helperMeshRenderer != null)
                 helperMeshRenderer.enabled = true;
 
-            rb.useGravity = useGravity;
+            if (rb != null)
+                rb.useGravity = useGravity;
 
             Debug.Log("OnEndDrag");
 
@@ -160,7 +164,7 @@ namespace Utility.PhysicsUtils
         {
             while (isDragging)
             {
-                if (rb.isKinematic)
+                if (rb != null && rb.isKinematic)
                     yield return null;
                 //screenClickPosition = Input.mousePosition;
 
@@ -276,7 +280,7 @@ namespace Utility.PhysicsUtils
 
         void Update()
         {
-            if (isDragging && rb.velocity.magnitude >= maxVelocity * 0.99f)
+            if (isDragging && rb != null && rb.velocity.magnitude >= maxVelocity * 0.99f)
             {
                 VibrationHelper.Vibrate((long)Mathf.Ceil(Time.deltaTime * 1000f));
             }

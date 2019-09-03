@@ -88,6 +88,22 @@ public class DetectedPlaneRaycaster : MonoBehaviour
         Ray cameraRay = new Ray(camera.transform.position, camera.transform.forward);
         List<ARRaycastHit> hitResults = new List<ARRaycastHit>();
 
+#if UNITY_EDITOR
+
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+
+        var ray = camera.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
+        if ( groundPlane.Raycast(ray, out float hitDistance) )
+        {
+            if (hitDistance < 10f)
+            {
+                hitList = new List<ARRaycastHit>();
+                hitList.Add(new ARRaycastHit(new XRRaycastHit(new TrackableId(), new Pose(ray.origin + ray.direction * hitDistance, Quaternion.identity), hitDistance, TrackableType.Planes), hitDistance, transform));
+                return true;
+            }
+        }
+#endif
+
         if (raycastManager.Raycast(new Vector2(Screen.width / 2f, Screen.height / 2f), hitResults, trackableTypeFilter))
         {
             hitList = hitResults;
@@ -95,4 +111,5 @@ public class DetectedPlaneRaycaster : MonoBehaviour
         }
         return false;
     }
+
 }

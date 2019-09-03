@@ -8,32 +8,68 @@ namespace Utility.CommonUtils
 {
     public class StareEvent : MonoBehaviour
     {
-        [ReadOnly]
-        bool visible;
+        public bool visible;
 
         public UnityEvent onBecomeVisible;
 
         public UnityEvent onBecomeInvisible;
 
+        public float delay = 1.0f;
+
+        Coroutine delayRoutine;
+
         private void OnBecameVisible()
         {
-            if (!visible)
+            if (isActiveAndEnabled)
             {
-                visible = true;
+                if (!visible)
+                {
+                    if (delayRoutine != null)
+                    {
+                        StopCoroutine(delayRoutine);
+                    }
+                    delayRoutine = StartCoroutine(DelayedRoutine(() => {
 
-                onBecomeVisible.Invoke();
+                        visible = true;
+
+                        onBecomeVisible.Invoke();
+
+                    }));
+                }
             }
+        }
 
+        IEnumerator DelayedRoutine(System.Action callback)
+        {
+            float timer = 0f;
+            while (timer < delay)
+            {
+                timer += Time.deltaTime;
+                yield return null;
+            }
+            callback.Invoke();
         }
 
         private void OnBecameInvisible()
         {
-            if (visible)
+            if (delayRoutine != null)
             {
-                visible = false;
-
-                onBecomeInvisible.Invoke();
+                StopCoroutine(delayRoutine);
             }
+
+            if (isActiveAndEnabled)
+            {
+                if (visible)
+                {
+                    visible = false;
+
+                    onBecomeInvisible.Invoke();
+                }
+            }
+        }
+        void Update()
+        {
+
         }
     }
 }

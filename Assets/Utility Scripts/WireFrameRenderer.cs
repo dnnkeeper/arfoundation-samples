@@ -13,7 +13,7 @@ public class WireFrameRenderer : MonoBehaviour {
 	private Vector3[] lines; 
 	private ArrayList linesArray; 
 	public Material lineMaterial;
-    new Collider collider;
+    new public Collider collider;
 	//private MeshRenderer meshRenderer; 
 
 	// Use this for initialization
@@ -21,7 +21,7 @@ public class WireFrameRenderer : MonoBehaviour {
         collider = GetComponent<Collider>();
         Init();
     }
-    bool inited;
+    public bool inited;
     public void Init()
     {
         inited = false;
@@ -44,10 +44,19 @@ public class WireFrameRenderer : MonoBehaviour {
         if (filter != null)
         {
             Mesh mesh = filter.sharedMesh;
-            if (mesh == null || !mesh.isReadable)
-                return;
+            var meshCollider = collider as MeshCollider;
+            if (meshCollider != null){
+                Debug.Log("Mesh Collider for wireframe was found");
+                mesh = meshCollider.sharedMesh;
+            }
 
+            if (mesh == null || !mesh.isReadable){
+                Debug.LogWarning("Mesh is not readable "+mesh.name, this);
+            
+                return;
+            }
             inited = true;
+            Debug.Log("Init wireframe");
             Vector3[] vertices = mesh.vertices;
             int[] triangles = mesh.triangles;
             linesArray = new ArrayList();

@@ -50,6 +50,8 @@ namespace Utility.UI
                 originalParent = transform.parent;
 
                 var parent = new GameObject("CanvasLerpParent").transform;
+                if (cam != null)
+                    parent.parent = cam.transform;
                 parent.position = originalParent.position;
                 parent.rotation = originalParent.rotation;
                 transform.SetParent(parent);
@@ -81,6 +83,8 @@ namespace Utility.UI
 
         public void SnapToggle()
         {
+            if (cam == null)
+                cam = Camera.main;
             //cam = camera;
             if (state != SnapState.Snapping)
             {
@@ -104,6 +108,7 @@ namespace Utility.UI
         // Use this for initialization
         void Start()
         {
+            originalParent = transform.parent;
             if (cam == null)
                 cam = Camera.main;
 
@@ -115,7 +120,7 @@ namespace Utility.UI
             initLocalPos = rt.localPosition;
             initLocalRot = rt.localRotation;
 
-            Debug.Log("initialScale " + initSize);
+            //Debug.Log("initialScale " + initSize);
         }
 
         [ReadOnly]
@@ -128,17 +133,22 @@ namespace Utility.UI
             return snapped;
         }
 
+        public float snapSpeed = 1f;
+
         private void LateUpdate()
         {
+            if (cam == null)
+                cam = Camera.main;
+
             if (state != SnapState.None)
             {
                 if (state == SnapState.Snapping)
                 {
-                    progressTime += Time.deltaTime ;
+                    progressTime += Time.deltaTime * snapSpeed;
                 }
                 else
                 {
-                    progressTime -= Time.deltaTime;
+                    progressTime -= Time.deltaTime * snapSpeed;
                 }
 
                 if (progressTime <= 0f)
@@ -195,7 +205,7 @@ namespace Utility.UI
                 {
                     Vector3 targetScale = new Vector3(initScale.x * scale / transform.parent.lossyScale.x, initScale.y / transform.parent.lossyScale.y * scale, 1f);
 
-                    LerpParams(transform.parent.TransformPoint(initLocalPos), targetPos, initScale, targetScale, transform.parent.rotation * initLocalRot, targetRot, progressTime);
+                    LerpParams(originalParent.TransformPoint(initLocalPos), targetPos, initScale, targetScale, transform.parent.rotation * initLocalRot, targetRot, progressTime);
                 }
             }
         }
@@ -204,7 +214,7 @@ namespace Utility.UI
 
         void LerpParams(Vector3 initPos, Vector3 targetPos, Vector3 initScale, Vector3 targetScale, Quaternion initRotation, Quaternion targetRotation, float progress)
         {
-            transform.position = Vector3.Lerp(initPos, targetPos, progress * progress);
+            transform.position = Vector3.Lerp(initPos, targetPos, progress);
 
             transform.rotation = Quaternion.Lerp(initRotation, targetRotation, progress);
 

@@ -19,6 +19,8 @@ namespace Utility.CommonUtils
 
         public UnityEventGameObject onCollisionExit;
 
+        public UnityEventGameObject onParticlesHit;
+
         public string messageToCollider;
 
         public void OnTriggerEnter(Collider other)
@@ -29,7 +31,7 @@ namespace Utility.CommonUtils
 
                 if (!string.IsNullOrEmpty(messageToCollider))
                 {
-                    Debug.Log(messageToCollider + "Enter to " + other.gameObject);
+                    Debug.Log(messageToCollider + "Enter to " + other.gameObject, other.gameObject);
                     other.SendMessage(messageToCollider + "Enter", gameObject, SendMessageOptions.DontRequireReceiver);
                 }
             }
@@ -53,28 +55,38 @@ namespace Utility.CommonUtils
             if (collision.impulse.magnitude < collisionThresold)
                 return;
 
-            if (string.IsNullOrEmpty(triggerTag) || collision.rigidbody.CompareTag(triggerTag))
+            if (string.IsNullOrEmpty(triggerTag) || (collision.rigidbody != null && collision.rigidbody.CompareTag(triggerTag)) )
             {
-                onCollisionEnter.Invoke(collision.rigidbody.gameObject);
+                onCollisionEnter.Invoke(collision.rigidbody!=null?collision.rigidbody.gameObject:collision.collider.gameObject);
+
+                //Debug.Log("onCollisionEnter "+ collision.rigidbody.name, this);
 
                 if (!string.IsNullOrEmpty(messageToCollider))
                 {
-                    collision.rigidbody.gameObject.SendMessage(messageToCollider + "Enter", gameObject, SendMessageOptions.DontRequireReceiver);
+                    var messageTarget = collision.rigidbody!=null? collision.rigidbody.gameObject: collision.gameObject;
+                    messageTarget.SendMessage(messageToCollider + "Enter", gameObject, SendMessageOptions.DontRequireReceiver);
                 }
             }
         }
 
         public void OnCollisionExit(Collision collision)
         {
-            if (string.IsNullOrEmpty(triggerTag) || collision.rigidbody.CompareTag(triggerTag))
+            if (string.IsNullOrEmpty(triggerTag) || (collision.rigidbody != null && collision.rigidbody.CompareTag(triggerTag)) )
             {
-                onCollisionExit.Invoke(collision.rigidbody.gameObject);
+                onCollisionExit.Invoke(collision.rigidbody != null ? collision.rigidbody.gameObject : collision.collider.gameObject);
 
                 if (!string.IsNullOrEmpty(messageToCollider))
                 {
-                    collision.rigidbody.gameObject.SendMessage(messageToCollider + "Exit", gameObject, SendMessageOptions.DontRequireReceiver);
+                    var messageTarget = collision.rigidbody != null ? collision.rigidbody.gameObject : collision.gameObject;
+                    messageTarget.SendMessage(messageToCollider + "Exit", gameObject, SendMessageOptions.DontRequireReceiver);
                 }
             }
+        }
+
+        void OnParticleHit(ParticleSystem particlesSystem)
+        {
+            Debug.Log("Hit by particles from "+particlesSystem.gameObject.name, this);
+            onParticlesHit.Invoke(particlesSystem.gameObject);
         }
     }
 }

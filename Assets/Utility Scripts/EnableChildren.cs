@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnableChildren : MonoBehaviour {
 
+    public bool invokeWhenChildrenChange = false;
+
     public float interval = 1f;
 
 	public void EnableChild(float n)
@@ -54,6 +56,14 @@ public class EnableChildren : MonoBehaviour {
     void OnEnable()
     {
 
+    }
+
+    private void OnTransformChildrenChanged()
+    {
+        if (invokeWhenChildrenChange)
+        {
+            EnableChild(selectedN);
+        }
     }
 
     public void SelectNext()

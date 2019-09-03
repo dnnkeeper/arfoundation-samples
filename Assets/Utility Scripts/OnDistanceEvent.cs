@@ -18,13 +18,13 @@ public class OnDistanceEvent : MonoBehaviour
     {
         if (target != null)
         {
-            if (isInRadius && (transform.position - target.position).sqrMagnitude >= distance)
+            if (isInRadius && (transform.position - target.position).sqrMagnitude >= distance* distance)
             {
                 Debug.Log("onLeave"+ target);
                 isInRadius = false;
                 onLeave.Invoke();
             }
-            else if (!isInRadius && (transform.position - target.position).sqrMagnitude < distance)
+            else if (!isInRadius && (transform.position - target.position).sqrMagnitude < distance* distance)
             {
                 Debug.Log("onApproach" + target);
                 isInRadius = true;

@@ -14,12 +14,12 @@ public class EditorOnlyBehaviour : MonoBehaviour
         {   
             if (DisableInEditor && isActiveAndEnabled)
             {
-                Debug.Log(gameObject.name + " <color=grey>disabled</color> (DisableInEditor)");
+                Debug.Log("[EditorOnlyBehaviour] " + gameObject.name + " <color=grey>disabled</color> (DisableInEditor)");
                 gameObject.SetActive(false);
             }
             else if (!isActiveAndEnabled)
             {
-                Debug.Log(gameObject.name + " <color=white>enabled</color> (EditorOnly)");
+                Debug.Log("[EditorOnlyBehaviour] " + gameObject.name + " <color=white>enabled</color> (EditorOnly)");
                 gameObject.SetActive(true);
             }
         }
@@ -27,7 +27,7 @@ public class EditorOnlyBehaviour : MonoBehaviour
         {
             if (DisableInRuntime && isActiveAndEnabled)
             {
-                Debug.Log(gameObject.name + " <color=grey>disabled</color> (DisableInRuntime)");
+                Debug.Log("[EditorOnlyBehaviour] " + gameObject.name + " <color=grey>disabled</color> (DisableInRuntime)");
                 gameObject.SetActive(false);
             }            
         }

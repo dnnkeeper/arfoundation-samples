@@ -12,18 +12,64 @@ namespace Utility.CommonUtils
 
         public bool lookAway;
 
+        public bool useLerp;
+
+        public float speed = 1f;
+
+        public bool onPreRenderUpdate;
+
+        public void ToggleLookAway()
+        {
+            lookAway = !lookAway;
+        }
+
+        private void OnEnable()
+        {
+            var mainCam = Camera.main;
+            if (onPreRenderUpdate && mainCam != null)
+            {
+                var camEvents = mainCam.GetComponent<CameraOnRenderEvents>();
+                if (camEvents != null)
+                    camEvents.onPreRender += Update;
+            }
+        }
+
+        void OnDisable()
+        {
+            var mainCam = Camera.main;
+            if (onPreRenderUpdate && mainCam != null)
+            {
+                var camEvents = mainCam.GetComponent<CameraOnRenderEvents>();
+                if (camEvents != null)
+                    camEvents.onPreRender -= Update;
+            }
+        }
         private void Start()
         {
-            if (findMainCamera && target == null)
-            {
-                target = Camera.main.transform;
-            }
+           
         }
 
         // Update is called once per frame
         void Update()
         {
-            transform.rotation = Quaternion.LookRotation((lookAway ? -1f : 1f) * (target.position - transform.position).normalized, target.up);
+            if (target == null)
+            {
+                if (findMainCamera)
+                    target = Camera.main.transform;
+                else
+                {
+                    Debug.LogWarning(this+" lost target. Disabled");
+                    enabled = false;
+                    return;
+                }
+            }
+
+            var targetRotation = Quaternion.LookRotation((lookAway ? -1f : 1f) * (target.position - transform.position).normalized, target.up);
+
+            if (useLerp)
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * speed);
+            else
+                transform.rotation = targetRotation;
         }
     }
 }

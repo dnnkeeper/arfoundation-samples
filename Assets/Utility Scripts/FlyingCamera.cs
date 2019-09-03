@@ -41,9 +41,41 @@ namespace Utility.CameraUtil
 
         float x, y;
 
+        bool isMoving;
+
+        public void GoForward()
+        {
+            enabled = true;
+            StopAllCoroutines();
+            StartCoroutine(GoForwardRoutine());
+        }
+
+        public void Stop()
+        {
+            StopAllCoroutines();
+        }
+
+        IEnumerator GoForwardRoutine()
+        {
+            Debug.Log("GoForwardRoutine");
+            while (true)
+            {
+                moveDirection = Vector3.forward;
+
+                targetSpeed = Mathf.Clamp(targetSpeed * (1f + Input.mouseScrollDelta.y * 0.05f), 0f, maxSpeed);
+
+                targetVelocity = Vector3.Lerp(targetVelocity, moveDirection * targetSpeed, accelerationRate * Time.deltaTime);
+                
+                targetPosition = transform.position + transform.TransformVector(targetVelocity * Time.deltaTime * speedMod);
+
+                transform.position = targetPosition;
+
+                yield return null;
+            }
+        }
+
         void Update()
         {
-
             float deltaTime = Time.deltaTime;
 
             if (!enabled)
@@ -56,13 +88,15 @@ namespace Utility.CameraUtil
                 targetVelocity = Vector3.zero;
             }
 
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(1) || isMoving)
             {
                 targetPosition = transform.position;
 
                 moveDirection = Vector3.zero;
 
-                bool move = false;
+                bool move = isMoving;
+
+                isMoving = false;
 
                 if (Input.GetKey(KeyCode.W))
                 {

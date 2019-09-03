@@ -45,7 +45,7 @@ public class ParticleSystemCollisionBroadcaster : MonoBehaviour
             }*/
 
             //Debug.Log("Collision with "+other);
-            messageReciever.SendMessage(message, SendMessageOptions.DontRequireReceiver);
+            messageReciever.SendMessage(message, part, SendMessageOptions.DontRequireReceiver);
             i++;
         }
     }
